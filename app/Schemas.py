@@ -43,5 +43,6 @@ class TaskOut(BaseModel):
     owner_id: UUID
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+class Config:
+    from_attributes = True
+

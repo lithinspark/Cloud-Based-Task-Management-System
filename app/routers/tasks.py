@@ -1,8 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from .. import models, schemas
-from ..dependencies import get_db, get_current_user
-from typing import Optional
+from ..dependencies import get_current_user, get_db
 
 router = APIRouter(prefix="/tasks", tags=["Tasks"])
 
@@ -10,30 +9,47 @@ router = APIRouter(prefix="/tasks", tags=["Tasks"])
 def create_task(task: schemas.TaskCreate,
                 db: Session = Depends(get_db),
                 user=Depends(get_current_user)):
-    db_task = models.Task(**task.dict(), owner_id=user.id)
-    db.add(db_task)
+    new_task = models.Task(
+        title=task.title,
+        description=task.description,
+        owner_id=user.id
+    )
+    db.add(new_task)
     db.commit()
-    db.refresh(db_task)
-    return db_task
+    return new_task
 
 @router.get("/")
-def get_tasks(page: int = 1,
-              limit: int = 10,
-              status: Optional[str] = None,
-              search: Optional[str] = None,
-              db: Session = Depends(get_db),
+def get_tasks(db: Session = Depends(get_db),
               user=Depends(get_current_user)):
+    return db.query(models.Task).filter(models.Task.owner_id == user.id).all()
 
-    query = db.query(models.Task)
+@router.put("/{task_id}")
+def update_task(task_id: str,
+                task: schemas.TaskUpdate,
+                db: Session = Depends(get_db),
+                user=Depends(get_current_user)):
+    db_task = db.query(models.Task).filter(models.Task.id == task_id,
+                                           models.Task.owner_id == user.id).first()
+    if not db_task:
+        raise HTTPException(404)
 
-    if user.role != "admin":
-        query = query.filter(models.Task.owner_id == user.id)
+    if task.title:
+        db_task.title = task.title
+    if task.description:
+        db_task.description = task.description
 
-    if status:
-        query = query.filter(models.Task.status == status)
+    db.commit()
+    return db_task
 
-    if search:
-        query = query.filter(models.Task.title.ilike(f"%{search}%"))
+@router.delete("/{task_id}")
+def delete_task(task_id: str,
+                db: Session = Depends(get_db),
+                user=Depends(get_current_user)):
+    db_task = db.query(models.Task).filter(models.Task.id == task_id,
+                                           models.Task.owner_id == user.id).first()
+    if not db_task:
+        raise HTTPException(404)
 
-    tasks = query.offset((page - 1) * limit).limit(limit).all()
-    return tasks
+    db.delete(db_task)
+    db.commit()
+    return {"message": "Deleted"}

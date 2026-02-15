@@ -1,7 +1,6 @@
 import uuid
-from sqlalchemy import Column, String, Text, Enum, ForeignKey, DateTime
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.sql import func
+from sqlalchemy import Column, String, ForeignKey, Enum
+from sqlalchemy.dialects.mysql import CHAR
 from sqlalchemy.orm import relationship
 from .database import Base
 import enum
@@ -10,30 +9,23 @@ class RoleEnum(str, enum.Enum):
     user = "user"
     admin = "admin"
 
-class StatusEnum(str, enum.Enum):
-    pending = "pending"
-    completed = "completed"
-
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    username = Column(String, unique=True, index=True, nullable=False)
-    email = Column(String, unique=True, index=True, nullable=False)
-    password_hash = Column(String, nullable=False)
+    id = Column(CHAR(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    username = Column(String(50), unique=True)
+    email = Column(String(100), unique=True)
+    password_hash = Column(String(255))
     role = Column(Enum(RoleEnum), default=RoleEnum.user)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    tasks = relationship("Task", back_populates="owner", cascade="all, delete")
+    tasks = relationship("Task", back_populates="owner")
 
 class Task(Base):
     __tablename__ = "tasks"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    title = Column(String, nullable=False)
-    description = Column(Text)
-    status = Column(Enum(StatusEnum), default=StatusEnum.pending)
-    owner_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    id = Column(CHAR(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    title = Column(String(200))
+    description = Column(String(500))
+    owner_id = Column(CHAR(36), ForeignKey("users.id"))
 
     owner = relationship("User", back_populates="tasks")
