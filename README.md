@@ -1,47 +1,40 @@
-# Cloud-Based-Task-Management-System
+# 🚀 Cloud-Based Task Management System
 
+A production-ready **RESTful Task Management API** built using FastAPI, MySQL, JWT authentication, and Docker.
 
----
-
-# 📘 Smart Task Management API
-
-A production-ready **Task Management REST API** built using FastAPI, MySQL, Docker, JWT authentication, and Role-Based Access Control (RBAC).
-
-This project demonstrates backend architecture, authentication, authorization, pagination, filtering, and containerized deployment.
+This project demonstrates backend system design, secure authentication, CRUD operations, and containerized deployment — designed to showcase Software Development Engineer (SDE) level skills.
 
 ---
 
-# 🚀 Features
+## 📌 Features
 
-* ✅ User Registration & Login
-* ✅ JWT Authentication
-* ✅ Role-Based Access Control (User/Admin)
-* ✅ Task CRUD Operations
-* ✅ Pagination
-* ✅ Search by Title
-* ✅ Filter by Status
-* ✅ MySQL Database
-* ✅ Dockerized Environment
-* ✅ Production-Ready Structure
+* 🔐 JWT Authentication
+* 👥 User Registration & Login
+* 🛡 Role-Based Access (User / Admin ready)
+* 📋 Full CRUD Operations for Tasks
+* 🔎 Pagination, Filtering & Search (extendable)
+* 🐳 Dockerized MySQL Database
+* 🧱 Clean Layered Architecture
+* 📖 Auto API Documentation (Swagger UI)
 
 ---
 
-# 🏗️ Tech Stack
+## 🏗 Tech Stack
 
 * Python 3.11
 * FastAPI
 * SQLAlchemy ORM
-* MySQL 8
-* Docker & Docker Compose
+* MySQL 8 (Docker)
 * JWT (python-jose)
-* Bcrypt Password Hashing
+* Passlib (bcrypt)
+* Docker & Docker Compose
 
 ---
 
-# 📂 Project Structure
+## 📂 Project Structure
 
 ```
-smart-task-api/
+Cloud-Based-Task-Management-System/
 │
 ├── app/
 │   ├── main.py
@@ -51,6 +44,8 @@ smart-task-api/
 │   ├── auth.py
 │   ├── dependencies.py
 │   ├── routers/
+│   │     ├── auth.py
+│   │     └── tasks.py
 │
 ├── Dockerfile
 ├── docker-compose.yml
@@ -61,17 +56,17 @@ smart-task-api/
 
 ---
 
-# 🛠️ Installation & Setup
+## ⚙️ Setup Instructions
 
 ---
 
-## 🔹 Option 1: Run Using Docker (Recommended)
+### 🔹 Option 1: Run with Docker (Recommended)
 
 ### 1️⃣ Clone Repository
 
 ```bash
-git clone <your-repo-url>
-cd smart-task-api
+git clone https://github.com/lithinspark/Cloud-Based-Task-Management-System.git
+cd Cloud-Based-Task-Management-System
 ```
 
 ---
@@ -100,7 +95,7 @@ docker compose up --build
 
 ### 4️⃣ Access API
 
-Swagger UI:
+Swagger Documentation:
 
 ```
 http://localhost:8000/docs
@@ -108,52 +103,13 @@ http://localhost:8000/docs
 
 ---
 
-## 🔹 Option 2: Run Locally Without Docker
-
-### 1️⃣ Create Virtual Environment
-
-```bash
-python -m venv venv
-venv\Scripts\activate   # Windows
-```
+## 🔐 Authentication Flow
 
 ---
 
-### 2️⃣ Install Dependencies
+### 📝 Register User
 
-```bash
-pip install -r requirements.txt
-```
-
----
-
-### 3️⃣ Set Database URL
-
-If MySQL running locally:
-
-```
-mysql+pymysql://appuser:apppassword@localhost:3306/smart_tasks
-```
-
----
-
-### 4️⃣ Start Server
-
-```bash
-uvicorn app.main:app --reload
-```
-
----
-
-# 🔐 Authentication
-
-## Register
-
-```
-POST /auth/register
-```
-
-Body:
+**POST** `/auth/register`
 
 ```json
 {
@@ -165,11 +121,9 @@ Body:
 
 ---
 
-## Login
+### 🔑 Login
 
-```
-POST /auth/login
-```
+**POST** `/auth/login`
 
 Returns:
 
@@ -179,168 +133,130 @@ Returns:
 }
 ```
 
-Use token in header:
+Use token in headers:
 
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <JWT_TOKEN>
 ```
 
 ---
 
-# 📋 Task Endpoints
+## 📋 Task CRUD Endpoints
 
-| Method | Endpoint    | Description                      |
-| ------ | ----------- | -------------------------------- |
-| POST   | /tasks      | Create task                      |
-| GET    | /tasks      | Get tasks (pagination supported) |
-| GET    | /tasks/{id} | Get single task                  |
-| PUT    | /tasks/{id} | Update task                      |
-| DELETE | /tasks/{id} | Delete task                      |
-
----
-
-# 🔎 Query Parameters
-
-```
-/tasks?page=1&limit=10&status=pending&search=meeting&sort=desc
-```
-
-Supports:
-
-* Pagination
-* Filtering by status
-* Search by title
-* Sorting by created_at
+| Method | Endpoint    | Description    |
+| ------ | ----------- | -------------- |
+| POST   | /tasks      | Create task    |
+| GET    | /tasks      | Get user tasks |
+| PUT    | /tasks/{id} | Update task    |
+| DELETE | /tasks/{id} | Delete task    |
 
 ---
 
-# 👥 Role-Based Access Control
+## 🗄 Database Schema
 
-### User
+### Users Table
 
-* Create task
-* View own tasks
-* Update own tasks
-* Delete own tasks
-
-### Admin
-
-* View all tasks
-* Delete any task
-* View all users
-* Delete users
+* id (UUID)
+* username (Unique)
+* email (Unique)
+* password_hash
+* role
+* created_at
 
 ---
 
-# 🗄️ Database Schema
+### Tasks Table
 
-## Users Table
-
-| Field         | Type      |
-| ------------- | --------- |
-| id            | UUID      |
-| username      | VARCHAR   |
-| email         | VARCHAR   |
-| password_hash | TEXT      |
-| role          | ENUM      |
-| created_at    | TIMESTAMP |
+* id (UUID)
+* title
+* description
+* owner_id (Foreign Key → users)
+* created_at
 
 ---
 
-## Tasks Table
+## 🔄 REST API Principles Used
 
-| Field       | Type      |
-| ----------- | --------- |
-| id          | UUID      |
-| title       | VARCHAR   |
-| description | TEXT      |
-| status      | ENUM      |
-| owner_id    | UUID      |
-| created_at  | TIMESTAMP |
+* Resource-based URLs
+* Stateless authentication (JWT)
+* Proper HTTP methods
+* JSON responses
+* HTTP status codes
+* Modular router structure
 
 ---
 
-# 🐳 Docker Configuration
+## 🐳 Docker Services
 
-### MySQL Service
+### MySQL Container
 
 * Image: mysql:8
 * Port: 3306
-* Persistent Volume enabled
+* Persistent storage enabled
 
-### API Service
+### API Container
 
-* Built from Dockerfile
-* Runs on port 8000
+* Runs FastAPI
+* Exposed on port 8000
 
 ---
 
-# 🧪 Testing
+## 🧪 Testing
 
-You can test endpoints using:
+Test using:
 
 * Swagger UI (`/docs`)
 * Postman
 * curl
 
----
+Example:
 
-# ⚠ Common Issues
-
-### Port Already in Use
-
-Change port mapping in docker-compose.yml
-
-### Access Denied Error
-
-Check:
-
-* Username
-* Password
-* Database name
-
-### Cannot Connect to DB
-
-Ensure:
-
-* Container is running
-* Correct DATABASE_URL
-* Correct host (db or localhost)
+```bash
+curl -X GET http://localhost:8000/tasks \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
 
 ---
 
-# 🚀 Future Improvements
+## 🚀 Future Enhancements
 
-* Add Refresh Tokens
-* Add Redis Caching
-* Add Rate Limiting
-* Add Alembic Migrations
-* Deploy to AWS EC2
-* Add CI/CD Pipeline
+* Refresh Tokens
+* Role-Based Admin APIs
+* Pagination & Filtering
+* Redis Caching
+* Rate Limiting
+* CI/CD Pipeline
+* AWS Deployment
+* Alembic Migrations
 
 ---
 
-# 📌 Learning Outcomes
+## 🎯 Learning Objectives
 
 This project demonstrates:
 
-* Backend system design
-* JWT authentication
-* Role-based authorization
+* Backend architecture design
+* Secure authentication implementation
+* REST API best practices
 * Database relationships
-* Query optimization
-* Dockerized deployment
-* Production-level API design
+* Containerized deployment
+* Production-ready API structure
 
 ---
 
-# 📄 License
+## 👨‍💻 Author
 
-This project is for educational and demonstration purposes.
-
----
-
-# 👨‍💻 Author
-  Lithin Spark
+Lithin Spark
 Backend Developer | FastAPI | MySQL | Docker
 
+---
+
+If you want, I can now:
+
+* 🔥 Make it more professional (Open-source style)
+* 🔥 Add architecture diagram section
+* 🔥 Add shields & GitHub badges
+* 🔥 Write ATS-optimized project description
+* 🔥 Create deployment section for AWS
+
+Tell me your next step 🚀
